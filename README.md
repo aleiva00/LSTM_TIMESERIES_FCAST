@@ -6,7 +6,7 @@ This repo houses my final project for a machine learning course at TEC de Costa 
 # Table of Contents
 
 - [1. What is LSTM](<Documentation/1. What is LSTM.md>): high level explanation and examples.
-- [2. Preprocessing](Documentation/2. Pre-processing.md): handling missing values and building a rectangular matrix for next steps.
+- [2. Preprocessing](<Documentation/2. Pre-processing.md>): handling missing values and building a rectangular matrix for next steps.
 - [3. Time series to supervised learning problem](<Documentation/3. Time series to supervised learning problem.md>): transform lags into features.
 - [4. Building the model](<Documentation/4. Building the model.md>): get the data ready, split into train, val and test, build the model, train it and see what happens.
 - [5- Results and final remarks](<Documentation/5. Results and final remarks.md>): couple lessons from this flash project.
