@@ -1,15 +1,16 @@
-# ML_Final_Project
+# ML Final Project: Multivariate one-step forecasting with LSTM model
 This repo houses my final project for a machine learning course at TEC de Costa Rica. Titled 'Time Series Forecasting with LSTM Model' it showcases how to solve a forecasting problem for time series with recurrent neural networks. Although time-constrained, it offers a primer for more sophisticated models. This is joint work with Cristian Cubero.
 
 
 
 # Table of Contents
 
-- [1. What is LSTM](<# 1. What is LSTM>): high level explanation and examples.
-- [2. Preprocessing](<# 2. Pre-processing>): handling missing values and building a rectangular matrix for next steps.
-- [3. Time series to supervised learning problem](<Documentation/3. Time series to supervised learning problem.md>): transform lags into features.
-- [4. Building the model](<Documentation/4. Building the model.md>): get the data ready, split into train, val and test, build the model, train it and see what happens.
-- [5- Results and final remarks](<Documentation/5. Results and final remarks.md>): couple lessons from this flash project.
+- [1. What is LSTM](<#1-what-is-lstm>): high level explanation and examples.
+- [2. Preprocessing](#2-pre-processing): handling missing values and building a rectangular matrix for next steps.
+- [3. Time series to supervised learning problem](#3-transformation-of-time-series-for-supervised-learning): transform lags into features.
+- [4. Some steps before building the model](#4-some-steps-before-building-the-model): get the data ready and split into train, val and test.
+- [5- Model](#5-model): Build the model, train it, see what happens.
+- [6- Results and final remarks](#6-results-and-final-remarks): couple lessons from this flash project.
 
 
 
@@ -78,7 +79,7 @@ Visual representation:
 
 ![LSTM Architecture](https://databasecamp.de/wp-content/uploads/lstm-architecture-1024x709.png)
 
-* Utilizes 2 pathways (long and short-term) instead of just 1 like an RNN - after "a corto plazo" at the beginning of lstm.
+* Utilizes 2 pathways (long and short-term) instead of just 1 like an RNN - after "a short term" at the beginning of lstm.
 
 * The sigmoid function takes a coordinate on the x-axis and converts it to any coordinate on the y-axis between 0 and 1 (giving us the forget gate, the percentage of long-term memory to be discarded).
 
@@ -132,9 +133,167 @@ Observations:
 
 
 
+# 3. Transformation of Time Series for Supervised Learning
+
+The "features" of a time series often include lagged periods of itself and other lagged time series that may influence the main time series. For this reason, in order for a supervised learning model to consider these lags as features, they must be in columns. That is:
+
+We start with a time series:
+
+| Time   | Value |
+|--------|-------|
+|   1    |  10   |
+|   2    |  15   |
+|   3    |  20   |
+|   4    |  25   |
+|   5    |  30   |
+
+Now, let's create a table showing the time series with lags of 1, 2, and 3 periods:
+
+| Time   | Value | Value(t-1) | Value(t-2) | Value(t-3) |
+|--------|-------|------------|------------|------------|
+|   1    |  10   |      -     |      -     |      -     |
+|   2    |  15   |     10     |      -     |      -     |
+|   3    |  20   |     15     |     10     |      -     |
+|   4    |  25   |     20     |     15     |     10     |
+|   5    |  30   |     25     |     20     |     15     |
+
+This transformation converts the time series into a supervised learning problem, where the current value (t) can be predicted based on past values.
+
+
+## Function to Automatically Perform This
+
+We create a function that receives the parameters:
+
+* data: time series
+* n_in: lags to predict t
+* n_out: number of predictions or outputs with n_lags
+
+And returns:
+
+* data in supervised learning format
+
+Function taken from:
+* https://machinelearningmastery.com/convert-time-series-supervised-learning-problem-python/
 
 
 
+# 4. Some steps before building the model
+
+1. **Load model data and double-check format**
+
+2. **Normalize features**
+
+   MinMaxScaler from scikit-learn is used to scale the features to the range (0, 1). Normalization is important to ensure that all features have the same scale and facilitate model training.
+
+3. **Transform to supervised learning**
+
+   See [Transformation of Time Series for Supervised Learning](#3-transformation-of-time-series-for-supervised-learning). Output is:
+
+
+   ![alt text](SERIES_TO_SUPERVISED.png)
+
+4. **Drop columns we do not want to predict.**
+
+    Note that we only kept one variable in time t which is our target variable.
+
+5. **Train, validation, and test set split**
+
+   - Train: 70% of the data
+   - Validation: 15%
+   - Test: 15%
+
+
+    ![alt text](EXP1_TRAIN_VAL_TEST.png)
+
+
+6. **Reshape training, validation, and test sets for multivariate problem**
+
+    You can read each parenthesis as -> (n_obs, periods to forecast, no_features) (n_obs, periods to forecast, no_target_var)
+
+   ![alt text](RESHAPE_FEATURES.png)
+
+   Graphical distribution of data in train, validation, and test sets. 
+   
+
+   ![alt text](EXP1_TRAIN_VAL_TEST_DIST.png)
+
+   Note that in our target var the data is distributed significantly different in the train, val and test periods which is an important challenge to train the model. As stated at the beginning, this has a lot of room for improvement. Worth to say that we ran more experiments than I am showing here in the jupyter notebook. Feel free to check it out.
+
+
+# 5. Model
+
+   - **Loss function**: RMSE
+   - **Activation function**: linear --> It was found that for forecasting (regression), it is common to use this activation function
+
+   ```python
+   from tensorflow.keras.models import Sequential
+   from tensorflow.keras.layers import LSTM, Dense
+   from tensorflow.keras.optimizers import RMSprop, Adam
+   import tensorflow as tf
+
+   tf.random.set_seed(123)
+   tf.config.experimental.enable_op_determinism()
+
+   N_UNITS = 128 # Size of hidden state (h) and memory cell (c) (128)
+   INPUT_SHAPE = (X_train.shape[1], X_train.shape[2]) # (rows/dates) x 12 (features)
+
+   # Hyperparameters
+
+   learn_rate = 0.0005  # 5e-4 before
+   EPOCHS = 500 # Hyperparameter
+   BATCH_SIZE = 256 # Hyperparameter
+
+   model = Sequential()
+
+   model.add(LSTM(N_UNITS, input_shape=INPUT_SHAPE))
+
+   model.add(Dense(OUTPUT_LENGTH, activation='linear')) # activation = 'linear' because we want to predict (regression)
+
+   # Loss function
+   def root_mean_squared_error(y_true, y_pred):
+       rmse = tf.math.sqrt(tf.math.reduce_mean(tf.square(y_pred-y_true)))
+       return rmse
+
+   # Compilation
+   optimizer = RMSprop(learning_rate= learn_rate)
+   model.compile(
+       optimizer = optimizer,
+       loss = root_mean_squared_error,
+   )
+   ```
+
+## Training
+
+![Training Animation](https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/a258b2108677535.5fc364926e4a7.gif)
+
+### Evaluation
+
+We use 500 epochs and see that from around 50 the error drops and converges to zero.
+
+   ![Loss Graph](EXP1_LOSS.png)
+
+
+
+# 6. Results and Final Remarks
+
+The model scores look quite good. The fit is good, and although it increases in the test period, it does not do so drastically. Although it can certainly be improved, it's not bad.
+
+![Model Scores](EXP1_SCORES.png)
+
+
+Finally, after rescaling the data (returning to our original magnitude), we can evaluate the forecasts vs the observed time series in reality.
+
+![Forecast vs Observed](EXP1_FORECASTS.png)
+
+Not bad for a first experiment!
+
+## Final Remarks
+
+* Converting the time series forecasting problem to a supervised learning problem involves a different data preparation.
+* Despite varying the training, validation, and test dates, the model consistently exhibits low errors.
+* The model is complex to understand and build, but especially challenging to explain. This represents a significant obstacle for its application in daily practice, where accountability to third parties may be necessary.
+* Something good to do if more time is available: fine-tuning with hyperparameters (e.g., grid search, etc.).
+* This model **has limited scope for more everyday problems**; forecasting the exchange rate for the next day may be of little use to most people. Despite this limitation, this practical exercise, which is restricted by time, **serves as a solid foundation** for adding complexity, steps, and generating forecasts over a longer time horizon.
 
 
 
