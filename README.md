@@ -133,7 +133,7 @@ Visual representation:
 
 2. Since the exchange rate is not traded during weekends and holidays, there will be NaNs. Also, due to the way the BCCR reports the exchange rate, there may be NaNs or 0's. Here, these NaNs could be either removed or filled with the data from the previous day. In this case, to avoid losing observations, they will be kept with data from the previous day. Moreover, it is reasonable to do this since the exchange rate over the weekend at teller windows remains the last available rate.
 
-    ![alt text](weekends.png)
+    ![alt text](./Images/weekends.png)
 
 
 
@@ -195,7 +195,7 @@ Function taken from:
    See [Transformation of Time Series for Supervised Learning](#3-transformation-of-time-series-for-supervised-learning). Output is:
 
 
-   ![alt text](SERIES_TO_SUPERVISED.png)
+   ![alt text](./Images/SERIES_TO_SUPERVISED.png)
 
 4. **Drop columns we do not want to predict.**
 
@@ -208,19 +208,19 @@ Function taken from:
    - Test: 15%
 
 
-    ![alt text](EXP1_TRAIN_VAL_TEST.png)
+    ![alt text](./Images/EXP1_TRAIN_VAL_TEST.png)
 
 
 6. **Reshape training, validation, and test sets for multivariate problem**
 
     You can read each parenthesis as -> (n_obs, periods to forecast, no_features) (n_obs, periods to forecast, no_target_var)
 
-   ![alt text](RESHAPE_FEATURES.png)
+   ![alt text](./Images/RESHAPE_FEATURES.png)
 
    Graphical distribution of data in train, validation, and test sets. 
    
 
-   ![alt text](EXP1_TRAIN_VAL_TEST_DIST.png)
+   ![alt text](./Images/EXP1_TRAIN_VAL_TEST_DIST.png)
 
    Note that in our target var the data is distributed significantly different in the train, val and test periods which is an important challenge to train the model. As stated at the beginning, this has a lot of room for improvement. Worth to say that we ran more experiments than I am showing here in the jupyter notebook. Feel free to check it out.
 
@@ -275,7 +275,7 @@ Function taken from:
 
 We use 500 epochs and see that from around 50 the error drops and converges to zero.
 
-   ![Loss Graph](EXP1_LOSS.png)
+   ![Loss Graph](./Images/EXP1_LOSS.png)
 
 
 
@@ -283,12 +283,12 @@ We use 500 epochs and see that from around 50 the error drops and converges to z
 
 The model scores look quite good. The fit is good, and although it increases in the test period, it does not do so drastically. Although it can certainly be improved, it's not bad.
 
-![Model Scores](EXP1_SCORES.png)
+![Model Scores](./Images/EXP1_SCORES.png)
 
 
 Finally, after rescaling the data (returning to our original magnitude), we can evaluate the forecasts vs the observed time series in reality.
 
-![Forecast vs Observed](EXP1_FORECASTS.png)
+![Forecast vs Observed](./Images/EXP1_FORECASTS.png)
 
 Not bad for a first experiment!
 
@@ -299,14 +299,6 @@ Not bad for a first experiment!
 * The model is complex to understand and build, but especially challenging to explain. This represents a significant obstacle for its application in daily practice, where accountability to third parties may be necessary.
 * Something good to do if more time is available: fine-tuning with hyperparameters (e.g., grid search, etc.).
 * This model **has limited scope for more everyday problems**; forecasting the exchange rate for the next day may be of little use to most people. Despite this limitation, this practical exercise, which is restricted by time, **serves as a solid foundation** for adding complexity, steps, and generating forecasts over a longer time horizon.
-
-
-
-
-
-
-
-
 
 
 
