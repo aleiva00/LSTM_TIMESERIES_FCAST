@@ -25,6 +25,7 @@ The variables used were selected according to the following criteria:
 
 Observations:
 
+* This model **has limited scope for more everyday problems**; forecasting the exchange rate for the next day may be of little use to most people. Despite this limitation, this practical exercise, which is restricted by time, **serves as a solid foundation** for adding complexity, steps, and generating forecasts over a longer time horizon.
 * The **data selection can be improved**, for example, by using existing economic literature. As the scope of the project is about the use of ML techniques, no time was invested in literature reviews.
 * For the purposes of this work, although variables were selected with certain economic rationale, the **priority is to look for patterns in the very short-term decisions** of the agents. This makes variables related to fundamental factors (e.g., imports, exports, tourism, FDI, etc.) not so relevant for the considered time horizon.
 * In addition to the previous point, **fundamental variables were discarded due to their frequency and lag** in publication --> A fundamental challenge in the discipline that has led to the emergence of initiatives such as nowcasting with real-time Google data, satellite data with parking lots of shopping centers, electricity consumption data, etc.
