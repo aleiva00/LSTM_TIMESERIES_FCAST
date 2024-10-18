@@ -5,6 +5,10 @@ Please find below a concise overview of our project's key findings and methodolo
 
 
 
+# Disclaimer (oct 2024)
+Hi, and thank you for visiting this project. As I’ve gained more experience in machine learning, I’ve revisited this work and identified several areas for improvement. Please note that this project was created without applying certain econometric principles, as the focus was on experimenting with RNNs under a tight deadline. I acknowledge the presence of some errors and limitations, and this project was primarily a learning exercise. Your understanding is appreciated.
+
+
 # Table of Contents
 
 - [1. What is LSTM](<#1-what-is-lstm>): high level explanation and examples.
